@@ -1,3 +1,3 @@
 fastapi
 uvicorn[standard]
-git+https://github.com/Star-Destroyers/sd-alert-pipe.git@main#egg=sd_alert_pipe
+-e git+https://github.com/Star-Destroyers/sd-alert-pipe.git@main#egg=sd_alert_pipe
