@@ -1,13 +1,14 @@
 from fastapi import FastAPI
-from app.explorer.views import router as explorer_router
 from fastapi.middleware.cors import CORSMiddleware
 from piccolo.engine import engine_finder
-import os
 
 from app.config import settings
+from app.explorer.views import router as explorer_router
+from app.targets.views import router as target_router
 
 app = FastAPI(title=settings.APP_NAME)
 app.include_router(explorer_router)
+app.include_router(target_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
