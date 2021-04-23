@@ -2,4 +2,7 @@ fastapi
 uvicorn[standard]
 arq
 piccolo
+pytest
+pytest-asyncio
+httpx
 -e git+https://github.com/Star-Destroyers/sd-alert-pipe.git@main#egg=sd_alert_pipe

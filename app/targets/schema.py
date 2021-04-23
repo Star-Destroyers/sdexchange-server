@@ -2,8 +2,9 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-class TargetSchema(BaseModel):
-    id: int
+
+class TargetBase(BaseModel):
+    name: str
     classification: str
     ra: float
     dec: float
@@ -12,6 +13,20 @@ class TargetSchema(BaseModel):
     latest_g_mag: Optional[float]
     max_r_mag: Optional[float]
     max_g_mag: Optional[float]
+
+class TargetCreate(TargetBase):
+    pass
+
+class TargetUpdate(TargetBase):
+    id: int
+    name: Optional[str]
+    classification: Optional[str]
+    ra: Optional[float]
+    dec: Optional[float]
+    utc: Optional[datetime]
+
+class TargetSchema(TargetBase):
+    id: int
     created: datetime
 
     class Config:
