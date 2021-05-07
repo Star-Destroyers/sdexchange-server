@@ -3,7 +3,7 @@ from typing import List
 
 from sd_alert_pipe.lasair import LasairService
 from sd_alert_pipe.common import RootResult, gather_data
-from sd_alert_pipe.tns import TNSService
+from sd_alert_pipe.tns import TNSService, TNSMatch
 
 router = APIRouter(
     prefix='/explorer',
@@ -21,8 +21,8 @@ async def ztfobject(object_id: str) -> RootResult:
     result = await gather_data(object_id)
     return result
 
-@router.get('/tns/cone/')
-async def tnscode(ra: float, dec: float) -> List[dict]:
+@router.get('/tns/cone/', response_model=List[TNSMatch])
+async def tnscode(ra: float, dec: float) -> List[TNSMatch]:
     tns = TNSService()
     result = await tns.cone_search(ra, dec)
     return result
