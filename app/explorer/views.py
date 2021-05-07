@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from typing import List
 
 from sd_alert_pipe.lasair import LasairService
-from sd_alert_pipe.common import gather_data
+from sd_alert_pipe.common import RootResult, gather_data
 from sd_alert_pipe.tns import TNSService
 
 router = APIRouter(
@@ -16,10 +16,10 @@ async def lasair_query(query_id: str) -> dict:
     result = await ls.stored_query(query_id)
     return result
 
-@router.get('/ztfobject/{object_id}/')
-async def ztfobject(object_id: str) -> dict:
+@router.get('/ztfobject/{object_id}/', response_model=RootResult)
+async def ztfobject(object_id: str) -> RootResult:
     result = await gather_data(object_id)
-    return {**result.dict()}
+    return result
 
 @router.get('/tns/cone/')
 async def tnscode(ra: float, dec: float) -> List[dict]:
