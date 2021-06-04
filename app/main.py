@@ -5,10 +5,12 @@ from piccolo.engine import engine_finder
 from app.config import settings
 from app.explorer.views import router as explorer_router
 from app.targets.views import router as target_router
+from app.auth.views import router as auth_rotuer
 
 app = FastAPI(title=settings.APP_NAME)
 app.include_router(explorer_router)
 app.include_router(target_router)
+app.include_router(auth_rotuer)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
