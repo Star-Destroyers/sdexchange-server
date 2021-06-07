@@ -1,8 +1,7 @@
 from piccolo.table import Table
-from piccolo.columns import Varchar, Timestamp, Real, Integer, BigInt, ForeignKey
+from piccolo.columns import Varchar, Timestamp, Real, BigInt, ForeignKey
 from datetime import datetime
 
-from sd_alert_pipe.common import RootResult
 
 class Target(Table):
     name: str = Varchar(index=True, required=True, unique=True)
@@ -28,4 +27,3 @@ class Detection(Table):
     jd: float = Real(required=True)
     utc: datetime = Timestamp(required=True)
     created: datetime = Timestamp()
-

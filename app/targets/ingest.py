@@ -2,7 +2,6 @@ from typing import List
 from logging import getLogger
 from datetime import datetime
 import asyncio
-from piccolo.query.methods import create
 from sd_alert_pipe.lasair import LasairService
 from sd_alert_pipe.lasair import DATETIME_FORMAT as LASAIR_DT_FORMAT
 from sd_alert_pipe.common import RootResult, gather_data
@@ -13,6 +12,7 @@ from app.targets.schema import TargetCreate, TargetUpdate
 from app.targets.crud import update_target, create_target
 
 logger = getLogger(__name__)
+
 
 async def ingest() -> int:
     num_saved = 0
@@ -43,6 +43,7 @@ async def ingest() -> int:
 
     return num_saved
 
+
 def latest_times(results: List[dict]) -> dict[str, datetime]:
     """
     Associate each name in the lasair result with the latest UTC
@@ -63,6 +64,7 @@ def latest_times(results: List[dict]) -> dict[str, datetime]:
 
     return latest_times
 
+
 async def names_to_query(latest_times: dict[str, datetime]) -> List[str]:
     """
     Given an association of name and latest timestamp, we need to query
@@ -76,6 +78,7 @@ async def names_to_query(latest_times: dict[str, datetime]) -> List[str]:
 
     return names_to_query
 
+
 async def create_or_update_names(objectids: List[str]) -> List[Target]:
     """
     Gather data for each name we want to fetch, then either update exsiting targets
@@ -88,6 +91,7 @@ async def create_or_update_names(objectids: List[str]) -> List[Target]:
 
     targets = await asyncio.gather(*[rootresult_to_target(result) for result in gathered_data])
     return targets
+
 
 async def rootresult_to_target(result: RootResult) -> Target:
     if await Target.exists().where(Target.name == result.name).run():
@@ -112,7 +116,6 @@ async def rootresult_to_target(result: RootResult) -> Target:
 
     await update_lightcurve(target, result.mars.data['prv_candidate'])
     return target
-
 
 
 async def update_lightcurve(target: Target, lightcurve: list) -> List[Detection]:
@@ -140,6 +143,7 @@ async def update_lightcurve(target: Target, lightcurve: list) -> List[Detection]
         await Detection.insert(*detections).run()
 
     return detections
+
 
 async def update_mags(target: Target) -> Target:
     latest_r_mag = await Detection.select('magpsf').where(
