@@ -1,6 +1,7 @@
 from piccolo.table import Table
 from piccolo.columns import Varchar, Timestamp, Real, BigInt, ForeignKey
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import List
 
 
 class Target(Table):
@@ -14,6 +15,20 @@ class Target(Table):
     max_r_mag: float = Real(null=True, default=None)
     max_g_mag: float = Real(null=True, default=None)
     created: datetime = Timestamp()
+    sparkline: List[float] = []
+
+    async def fetch_sparkline(self) -> List[float]:
+        detections: List[dict[float, datetime]] = await Detection.select(
+            Detection.magpsf, Detection.utc
+        ).where(
+            (Detection.target == self.id) & (Detection.utc >= datetime.utcnow() - timedelta(days=30))
+        ).order_by(Detection.utc)
+
+        days = [None] * 32
+        for detection in detections:
+            days[detection['utc'].day] = detection['magpsf']
+
+        self.sparkline = days
 
 
 class Detection(Table):

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Union
 
 
 class TargetBase(BaseModel):
@@ -14,8 +14,10 @@ class TargetBase(BaseModel):
     max_r_mag: Optional[float]
     max_g_mag: Optional[float]
 
+
 class TargetCreate(TargetBase):
     pass
+
 
 class TargetUpdate(TargetBase):
     id: int
@@ -25,16 +27,18 @@ class TargetUpdate(TargetBase):
     dec: Optional[float]
     utc: Optional[datetime]
 
-class TargetSchema(TargetBase):
+
+class TargetDetail(TargetBase):
     id: int
     created: datetime
+    sparkline: Optional[List[Union[float, None]]]
 
     class Config:
         orm_mode = True
 
 
 class Detection(BaseModel):
-    target: TargetSchema
+    target_id: int
     candid: int
     filter: str
     magpsf: float

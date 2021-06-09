@@ -96,7 +96,6 @@ async def create_or_update_names(objectids: List[str]) -> List[Target]:
 async def rootresult_to_target(result: RootResult) -> Target:
     if await Target.exists().where(Target.name == result.name).run():
         target = await Target.objects().where(Target.name == result.name).first().run()
-        print(result.lasair)
         target_update = TargetUpdate(
             id=target.id,
             classification=result.lasair.classification['type'],
