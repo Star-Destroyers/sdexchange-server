@@ -31,7 +31,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> BaseUser:
         headers={'WWW-Authenticate':  'Bearer'},
     )
     try:
-        payload = jwt.decode(token, settings.secret_key, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[JWT_ALGORITHM])
         username: str = payload.get('sub', '')
         if not username:
             raise credentials_exception
@@ -39,7 +39,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> BaseUser:
     except JWTError:
         raise credentials_exception
 
-    user = await BaseUser.objects().where(BaseUser.username == token_data.username)
+    user = await BaseUser.objects().where(BaseUser.username == token_data.username).first()
     if user is None:
         raise credentials_exception
 
@@ -47,7 +47,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> BaseUser:
 
 
 async def get_current_active_user(current_user: BaseUser = Depends(get_current_user)) -> BaseUser:
-    if not current_user.is_active:
+    if not current_user.active:
         raise HTTPException(status_code=400, detail='Inactive user')
     return current_user
 
