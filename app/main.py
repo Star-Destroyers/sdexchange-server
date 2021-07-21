@@ -19,17 +19,21 @@ app.add_middleware(
     allow_headers=['*']
 )
 
+
 @app.get('/ping')
 async def ping():
     return {'message': 'ok'}
 
+
 @app.on_event("startup")
 async def open_database_connection_pool():
     engine = engine_finder('app.piccolo_conf')
-    await engine.start_connnection_pool()
+    if engine:
+        await engine.start_connnection_pool(max_size=5)
 
 
 @app.on_event("shutdown")
 async def close_database_connection_pool():
     engine = engine_finder('app.piccolo_conf')
-    await engine.close_connnection_pool()
+    if engine:
+        await engine.close_connnection_pool()
