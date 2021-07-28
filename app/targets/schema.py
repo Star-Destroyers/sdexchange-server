@@ -40,7 +40,7 @@ class TargetDetail(TargetBase):
 class Detection(BaseModel):
     target_id: int
     candid: int
-    filter: str
+    filter_id: str
     magpsf: float
     sigmapsf: float
     diffmaglim: float

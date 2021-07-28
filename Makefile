@@ -8,7 +8,7 @@ test_loud:
 	PYTHONPATH=. DATABASE_URL='postgres://postgres:postgres@localhost:5432/tdeexchange_test' pytest -s
 
 shell:
-	piccolo shell run
+	python manage.py
 
 pulldb:
 	-docker start tde-postgres

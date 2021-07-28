@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     DATABASE_URL: PostgresDsn = 'postgres://postgres:postgres@localhost:5432/tdeexchange'
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     SECRET_KEY: str
+    TORTOISE: dict = {
+        'modules': {'models': ['app.targets.models']}
+    }
 
 
 settings = Settings()

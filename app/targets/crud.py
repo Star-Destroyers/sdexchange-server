@@ -5,18 +5,17 @@ from .schema import TargetCreate, TargetUpdate
 
 
 async def get_targets(limit: int = 100, offset: int = 0) -> List[Target]:
-    targets = await Target.objects().limit(limit).offset(offset).run()
+    targets = await Target.all().limit(limit).offset(offset)
     return targets
 
 
 async def create_target(target: TargetCreate) -> Target:
-    t = Target(**target.dict())
-    await t.save()
+    t = await Target.create(**target.dict())
     return t
 
 
 async def update_target(target: TargetUpdate) -> Target:
-    t = await Target.objects().where(Target.id == target.id).first().run()
+    t = await Target.get(pk=target.id)
     for attr, val in target.dict(exclude_unset=True, exclude={'id'}).items():
         setattr(t, attr, val)
     await t.save()

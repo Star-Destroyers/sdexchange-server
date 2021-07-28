@@ -11,6 +11,7 @@ from app.targets.schema import TargetCreate
 
 client = TestClient(app)
 
+
 class TestTargets:
     @pytest.mark.asyncio
     async def test_list_targets(self, client: AsyncClient) -> None:
@@ -26,7 +27,6 @@ class TestTargets:
             max_g_mag=87
         )
         target = await create_target(tc)
-        print(target)
 
         response = await client.get(app.url_path_for('targets'))
         assert response.status_code == status.HTTP_200_OK

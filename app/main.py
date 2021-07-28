@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from piccolo.engine import engine_finder
+from tortoise.contrib import fastapi
+import logging
 
 from app.config import settings
 from app.explorer.views import router as explorer_router
@@ -19,21 +20,16 @@ app.add_middleware(
     allow_headers=['*']
 )
 
+fastapi.logging = logging.getLogger('uvicorn')
+fastapi.register_tortoise(
+    app=app,
+    db_url=settings.DATABASE_URL,
+    modules=settings.TORTOISE['modules'],
+    generate_schemas=True,
+    add_exception_handlers=True
+)
+
 
 @app.get('/ping')
 async def ping():
     return {'message': 'ok'}
-
-
-@app.on_event("startup")
-async def open_database_connection_pool():
-    engine = engine_finder('app.piccolo_conf')
-    if engine:
-        await engine.start_connnection_pool(max_size=5)
-
-
-@app.on_event("shutdown")
-async def close_database_connection_pool():
-    engine = engine_finder('app.piccolo_conf')
-    if engine:
-        await engine.close_connnection_pool()

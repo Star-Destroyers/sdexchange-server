@@ -28,7 +28,7 @@ async def ingest() -> int:
     logger.info(f'Latest entry is from {latest_entry}')
     # If there are no targets with a timestamp greater than the latest entry,
     # we'll search for new targets.
-    new_entries = not await Target.exists().where(Target.utc >= latest_entry).run()
+    new_entries = not await Target.filter(utc__gte=latest_entry).exists()
     if new_entries:
         latest = latest_times(results['digest'])
         objectids = await names_to_query(latest)
@@ -73,7 +73,7 @@ async def names_to_query(latest_times: dict[str, datetime]) -> List[str]:
     """
     names_to_query = []
     for name, time in latest_times.items():
-        if not await Target.exists().where((Target.name == name) & (Target.utc >= time)).run():
+        if not await Target.filter(name=name, utc__gte=time).exists():
             names_to_query.append(name)
 
     return names_to_query
@@ -94,8 +94,8 @@ async def create_or_update_names(objectids: List[str]) -> List[Target]:
 
 
 async def rootresult_to_target(result: RootResult) -> Target:
-    if await Target.exists().where(Target.name == result.name).run():
-        target = await Target.objects().where(Target.name == result.name).first().run()
+    if await Target.filter(name=result.name).exists():
+        target = await Target.get(name=result.name)
         target_update = TargetUpdate(
             id=target.id,
             classification=result.lasair.classification['type'],
@@ -123,12 +123,12 @@ async def update_lightcurve(target: Target, lightcurve: list) -> List[Detection]
         if not c.get('candid'):
             # Non detection
             continue
-        if not await Detection.exists().where(Detection.candid == c['candid']).run():
+        if not await Detection.filter(candid=c['candid']).exists():
             candidate = c['candidate']
             detection: Detection = Detection(
-                target=target.id,
+                target=target,
                 candid=c['candid'],
-                filter=candidate['filter'],
+                filter_id=candidate['filter'],
                 magpsf=candidate['magpsf'],
                 sigmapsf=candidate['sigmapsf'],
                 diffmaglim=candidate['diffmaglim'],
@@ -139,32 +139,20 @@ async def update_lightcurve(target: Target, lightcurve: list) -> List[Detection]
             detections.append(detection)
 
     if len(detections) > 0:
-        await Detection.insert(*detections).run()
+        await Detection.bulk_create([*detections])
 
     return detections
 
 
 async def update_mags(target: Target) -> Target:
-    latest_r_mag = await Detection.select('magpsf').where(
-        (Detection.target == target.id) &
-        (Detection.filter == 'r')
-    ).order_by('utc', ascending=False).limit(1).run()
-    latest_g_mag = await Detection.select('magpsf').where(
-        (Detection.target == target.id) &
-        (Detection.filter == 'g')
-    ).order_by('utc', ascending=False).limit(1).run()
-    max_r_mag = await Detection.select('magpsf').where(
-        (Detection.target == target.id) &
-        (Detection.filter == 'r')
-    ).order_by('magpsf', ascending=True).limit(1).run()
-    max_g_mag = await Detection.select('magpsf').where(
-        (Detection.target == target.id) &
-        (Detection.filter == 'g')
-    ).order_by('magpsf', ascending=True).limit(1).run()
+    latest_r_mag = await Detection.filter(target=target, filter_id='r').order_by('-utc').limit(1).values('magpsf')
+    latest_g_mag = await Detection.filter(target=target, filter_id='g').order_by('-utc').limit(1).values('magpsf')
+    max_r_mag = await Detection.filter(target=target, filter_id='r').order_by('-magpsf').limit(1).values('magpsf')
+    max_g_mag = await Detection.filter(target=target, filter_id='g').order_by('-magpsf').limit(1).values('magpsf')
     target.latest_r_mag = latest_r_mag[0]['magpsf']
     target.latest_g_mag = latest_g_mag[0]['magpsf']
     target.max_g_mag = max_g_mag[0]['magpsf']
     target.max_r_mag = max_r_mag[0]['magpsf']
-    await target.save().run()
+    await target.save()
 
     return target

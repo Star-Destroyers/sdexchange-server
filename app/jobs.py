@@ -6,8 +6,10 @@ from app.targets.ingest import ingest
 
 logger = logging.getLogger(__name__)
 
+
 async def test_job(ctx):
     print('Test job!')
+
 
 async def get_latest_alerts(ctx) -> None:
     await ingest()
