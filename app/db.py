@@ -1,5 +1,11 @@
 from tortoise import fields
 from tortoise.models import Model
+from fastapi_users.db import TortoiseUserDatabase
+
+from app.auth.schemas import UserDB
+from app.auth.models import User
+
+user_db = TortoiseUserDatabase(UserDB, User)
 
 
 class TimestampMixin():

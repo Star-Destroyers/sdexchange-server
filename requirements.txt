@@ -2,12 +2,13 @@ fastapi
 pydantic[email]
 uvicorn[standard]
 arq
-piccolo
 pytest
 pytest-asyncio
 httpx
 python-jose[cryptography]
 python-multipart
 tortoise-orm[asyncpg]
+fastapi-users[tortoise-orm]
 nest_asyncio
 -e git+https://github.com/Star-Destroyers/sd-alert-pipe.git@main#egg=sd_alert_pipe
+asynctest

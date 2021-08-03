@@ -5,6 +5,7 @@ from app.main import app
 
 client = TestClient(app)
 
+
 class TestMain:
     def test_ping(self):
         response = client.get(app.url_path_for('ping'))

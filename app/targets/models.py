@@ -18,6 +18,9 @@ class Target(TimestampMixin, BaseModel):
     detections: fields.ReverseRelation['Detection']
     sparkline: List[Optional[float]] = []
 
+    class Meta:
+        app = 'Targets'
+
     async def fetch_sparkline(self):
         detections: List[dict[float, datetime]] = await self.detections.filter(
             utc__gte=datetime.utcnow() - timedelta(days=30)
@@ -31,7 +34,7 @@ class Target(TimestampMixin, BaseModel):
 
 
 class Detection(TimestampMixin, BaseModel):
-    target: fields.ForeignKeyRelation[Target] = fields.ForeignKeyField('models.Target', on_delete=fields.CASCADE, related_name='detections')
+    target: fields.ForeignKeyRelation[Target] = fields.ForeignKeyField('Targets.Target', on_delete=fields.CASCADE, related_name='detections')
     candid: int = fields.BigIntField(index=True, unique=True)
     filter_id: str = fields.CharField(max_length=20)
     magpsf: float = fields.FloatField()
@@ -42,3 +45,7 @@ class Detection(TimestampMixin, BaseModel):
     utc: datetime = fields.DatetimeField()
     created: datetime = fields.DatetimeField(auto_now_add=True)
     modified: datetime = fields.DatetimeField(auto_now=True)
+
+    class Meta:
+
+        app = 'Targets'

@@ -1,28 +1,28 @@
 from fastapi import status
 from httpx import AsyncClient
-from piccolo.apps.user.tables import BaseUser
+from app.auth.models import User
+from app.auth.schemas import UserCreate
 import pytest
 
-from app.main import app
-from app.auth import crud
+from app.main import app, fastapi_users
 
 
 class TestAuth:
     @pytest.mark.asyncio
     async def test_login(self, client: AsyncClient) -> None:
-        creds = {'username': 'test_user', 'password': 'abc123'}
-        user = BaseUser(**creds)
-        await user.save()
+        creds = {'username': 'testagain@example.com', 'password': 'abc123'}
+        await fastapi_users.create_user(UserCreate(email=creds['username'], password=creds['password']))
 
-        response = await client.post(app.url_path_for('token'), data=creds)
+        response = await client.post(app.url_path_for('login'), data=creds)
+        print(response.content)
         assert response.status_code == status.HTTP_200_OK
         assert 'access_token' in response.json()
 
     @pytest.mark.asyncio
-    async def test_me(self, client: AsyncClient, basic_user: BaseUser) -> None:
+    async def test_me(self, client: AsyncClient, basic_user: User) -> None:
         response = await client.get(app.url_path_for('me'))
         assert response.status_code == status.HTTP_200_OK
-        assert response.json()['username'] == basic_user.username
+        assert response.json()['email'] == basic_user.email
 
     @pytest.mark.asyncio
     async def test_me_not_logged_in(self, client: AsyncClient) -> None:
@@ -30,17 +30,7 @@ class TestAuth:
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     @pytest.mark.asyncio
-    async def test_update_user(self, client: AsyncClient, basic_user: BaseUser) -> None:
-        update_data = {'first_name': 'Updateme', 'last_name': 'Plz'}
-        response = await client.patch(app.url_path_for('update_user_me'), json=update_data)
-        updated_user = await crud.get_user(basic_user.id)
-        assert response.status_code == status.HTTP_200_OK
-        assert updated_user.first_name == update_data['first_name']
-
-    @pytest.mark.asyncio
-    async def test_update_user_password(self, client: AsyncClient, basic_user: BaseUser) -> None:
-        update_data = {'current_password': 'test123', 'password': 'newpassword'}
-        response = await client.post(app.url_path_for('update_password_me'), json=update_data)
+    async def test_protected_route(self, client: AsyncClient, basic_user: User) -> None:
+        response = await client.get(app.url_path_for('protected_route'))
         print(response.content)
         assert response.status_code == status.HTTP_200_OK
-        assert await BaseUser.login(basic_user.username, 'newpassword') == basic_user.id

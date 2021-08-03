@@ -31,4 +31,3 @@ class TestTargets:
         response = await client.get(app.url_path_for('targets'))
         assert response.status_code == status.HTTP_200_OK
         assert response.json()[0]['id'] == target.id
-
